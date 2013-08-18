@@ -29,7 +29,10 @@ float pixToYCoord = graphYRange/height;
 
 vector <vertex> targetPoint;
 
-QuadTree qtree({0, 0}, {8, 8});
+vertex origin (0, 0);
+vertex axis (8, 8);
+
+QuadTree qtree(origin, axis);
 
 bool going (false);
 
@@ -37,8 +40,56 @@ long double randomFloat ();
 
 void  initializeViewMatrix ()
 {
+    graphXRange = graphXMax - graphXMin;
+    graphYRange = graphYMax - graphYMin;
     pixToXCoord = graphXRange/width;
     pixToYCoord = graphYRange/height;
+}
+
+static void resize(int w, int h)
+{
+    width = w;
+    height = h;
+    initializeViewMatrix();
+    glViewport (0,0,(GLsizei)width, (GLsizei)height);
+    glMatrixMode (GL_PROJECTION);
+    glLoadIdentity ();
+    gluOrtho2D (graphXMin, graphXMax, graphYMin, graphYMax);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+void pan (double xAmount, double yAmount)
+{
+    //initializeViewMatrix();
+    //glViewport (0,0,(GLsizei)width, (GLsizei)height);
+
+    graphXMin += xAmount;
+    graphXMax += xAmount;
+    graphYMin += yAmount;
+    graphYMax += yAmount;
+
+    glMatrixMode (GL_PROJECTION);
+    glLoadIdentity ();
+    gluOrtho2D (graphXMin, graphXMax, graphYMin, graphYMax);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+}
+
+void zoom (double xAmount, double yAmount)
+{
+    graphXMin -= xAmount;
+    graphXMax += xAmount;
+    graphYMin -= yAmount;
+    graphYMax += yAmount;
+
+    initializeViewMatrix ();
+
+    glMatrixMode (GL_PROJECTION);
+    glLoadIdentity ();
+    gluOrtho2D (graphXMin, graphXMax, graphYMin, graphYMax);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();   
 }
 
 long double randomFloat (){
@@ -90,6 +141,46 @@ static void key(unsigned char key, int x, int y)
             cout << qtree.print();
         break;        
 
+        case 'a':
+        case 'A':
+            pan (graphXRange/16.0, 0);
+        break;
+
+        case 'd':
+        case 'D':
+            pan (-graphXRange/16.0, 0);
+        break; 
+
+        case 'w':
+        case 'W':
+            pan (0, -graphYRange/16.0);
+        break; 
+
+        case 's':
+        case 'S':
+            pan (0, graphYRange/16.0);
+        break;
+
+        case '+':
+        case '=':
+            zoom ( 1.0, 1.0);
+        break; 
+
+        case '-':
+        case '_':
+            zoom ( -1.0, -1.0);
+        break;        
+    }
+    glutPostRedisplay();
+}
+
+static void special(int key, int x, int y)
+{
+    switch (key){
+        case 'GLUT_KEY_LEFT':
+            pan (graphXRange/16.0, 0);
+        break;    
+
     }
     glutPostRedisplay();
 }
@@ -114,7 +205,8 @@ static void motion (int x, int y)
 {
     vertex newpoint ( x*pixToXCoord + graphXMin,
                       -y*pixToYCoord + graphYMax);
-    //targetPoint.push_back(newpoint);
+    qtree.insert (newpoint);
+    targetPoint.push_back(newpoint);
     // cout << "mouse clicked at " << x << " " << y << endl;
     // cout << "new point at " << newpoint.x << " " << newpoint.y << endl;
     // cout << "points: " << targetPoint.size() << endl;
@@ -125,19 +217,6 @@ static void idle(void)
 
     glutPostRedisplay();
     //sleep (15);
-}
-
-static void resize(int w, int h)
-{
-    width = w;
-    height = h;
-    initializeViewMatrix();
-    glViewport (0,0,(GLsizei)width, (GLsizei)height);
-    glMatrixMode (GL_PROJECTION);
-    glLoadIdentity ();
-    gluOrtho2D (graphXMin, graphXMax, graphYMin, graphYMax);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
 }
 
 int main(int argc, char *argv[])
@@ -167,6 +246,7 @@ int main(int argc, char *argv[])
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
     glutKeyboardFunc(key);
+    glutSpecialFunc(special);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutIdleFunc(idle);

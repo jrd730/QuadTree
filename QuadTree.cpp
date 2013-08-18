@@ -52,8 +52,16 @@ vertex QuadTree::newCenter (int direction, QTNode* node)
 void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 {
 	// there is room in this node's bucket, or max depth has been reached
-	if ((node->bucket.size()  < maxBucketSize) || (depth > maxDepth)){
-		node->bucket.push_back (v);
+	if (node->leaf){
+		if (node->bucket.size() < maxBucketSize){
+			node->bucket.push_back (v);
+			if (node->bucket.size() >= maxBucketSize){
+				node->leaf = false;
+			}
+		}
+		else if (depth >= maxDepth){
+			//node->bucket.push_back (v);
+		}
 	}
 
 	// no room in bucket, move down tree

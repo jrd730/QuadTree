@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <list>
 #include <sstream>
+#include <stack>
 #include <string>
 #include <vector>
 #ifdef __APPLE__
@@ -36,9 +37,11 @@ class QTNode{
 			child[3] = NULL;
 			center = newCenter;
 			range = newRange;
+			leaf = true;
 		}
 		~QTNode (){}
 
+		bool leaf;
 		QTNode* child[4];
 		vertex center, range;
 		vector <vertex> bucket;
