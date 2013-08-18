@@ -11,6 +11,7 @@
 #include <list>
 #include <sstream>
 #include <string>
+#include <vector>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -28,25 +29,19 @@ class QTNode{
 	
 	public:
 		
-		QTNode (vertex newCenter, vertex newRange, bool withBucket=false) { 
+		QTNode (vertex newCenter, vertex newRange) { 
 			child[0] = NULL;
 			child[1] = NULL;
 			child[2] = NULL; 
 			child[3] = NULL;
 			center = newCenter;
 			range = newRange;
-			if (withBucket){
-				bucket = new list <vertex>;
-			}
-			else{
-				bucket = NULL;
-			}
 		}
 		~QTNode (){}
 
 		QTNode* child[4];
 		vertex center, range;
-		list <vertex> *bucket;
+		vector <vertex> bucket;
 	
 	private:
 		
@@ -67,6 +62,7 @@ class QuadTree
 
 	private:
 
+		void 	print (QTNode* node, stringstream& ss);
 		int 	direction (vertex point, QTNode* node);
 		vertex 	newCenter (int direction, QTNode* node);
 		void 	insert (vertex v, QTNode* node, unsigned depth);

@@ -85,8 +85,13 @@ static void key(unsigned char key, int x, int y)
             targetPoint.clear();
         break;
 
+        case 'p':
+        case 'P':
+            cout << qtree.print();
+        break;        
+
     }
-    //glutPostRedisplay();
+    glutPostRedisplay();
 }
 
 static void mouse (int button, int state, int x, int y)
@@ -154,8 +159,6 @@ int main(int argc, char *argv[])
         cout << "\nError: input file not found\n";
     }
 
-   
-
     glutInit(&argc, argv);
     glutInitWindowSize(width,height);
     glutInitWindowPosition(10,10);
@@ -171,4 +174,3 @@ int main(int argc, char *argv[])
     glutMainLoop();
     return EXIT_SUCCESS;
 }
-

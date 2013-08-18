@@ -2,7 +2,7 @@
 
 QuadTree::QuadTree (vertex center, vertex range)
 {
-	root = new QTNode(center, range, true);
+	root = new QTNode(center, range);
 	maxDepth = 16;
 	maxBucketSize = 1;
 }
@@ -52,8 +52,8 @@ vertex QuadTree::newCenter (int direction, QTNode* node)
 void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 {
 	// there is room in this node's bucket, or max depth has been reached
-	if (node->bucket && (node->bucket->size() < maxBucketSize || depth > maxDepth)){
-		node->bucket->push_front (v);
+	if ((node->bucket.size()  < maxBucketSize) || (depth > maxDepth)){
+		node->bucket.push_back (v);
 	}
 
 	// no room in bucket, move down tree
@@ -66,7 +66,6 @@ void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 		else{
 			node->child[dir] = new QTNode (newCenter (dir, node), 
 									{node->range.x/2.0, node->range.y/2.0});
-			node->child[dir]->bucket = new list <vertex>;
 			insert (v, node->child[dir], depth+1);
 		}
 	}
@@ -79,7 +78,25 @@ bool QuadTree::contains (vertex v)
 
 string QuadTree::print ()
 {
-	return "";
+	stringstream ss("");
+	print (root, ss);
+	return ss.str();
+}
+
+void QuadTree::print (QTNode* node, stringstream& ss)
+{
+	for (int i=0; i < 4; ++i){
+		if (node->child[i]){
+			print (node->child[i], ss);
+			for (int i = 0; i < node->bucket.size(); i++){
+				ss << '{' << node->bucket[i].x << ','
+						 << node->bucket[i].y << '}' << ' ';
+			}
+		}
+	}
+	
+	return;
+
 }
 
 void QuadTree::draw ()
