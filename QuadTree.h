@@ -68,6 +68,7 @@ class QuadTree
 		void 	print (QTNode* node, stringstream& ss);
 		int 	direction (vertex point, QTNode* node);
 		vertex 	newCenter (int direction, QTNode* node);
+		QTNode* childNode (vertex v, QTNode* node);
 		void 	insert (vertex v, QTNode* node, unsigned depth);
 		void 	draw (QTNode* node);
 

@@ -3,7 +3,7 @@
 QuadTree::QuadTree (vertex center, vertex range)
 {
 	root = new QTNode(center, range);
-	maxDepth = 16;
+	maxDepth = 32;
 	maxBucketSize = 1;
 }
 
@@ -23,6 +23,20 @@ int QuadTree::direction (vertex point, QTNode* node)
 	X |= ((point.x >= node->center.x)<<1);
 	Y |= ((point.y >= node->center.y)<<0);
 	return (X|Y);
+}
+
+QTNode* QuadTree::childNode (vertex v, QTNode* node)
+{
+	unsigned dir = direction (v, node);
+		
+	if (node->child[dir]){
+		return node->child[dir];
+	}
+	else{
+		node->child[dir] = new QTNode (newCenter (dir, node), 
+								{node->range.x/2.0, node->range.y/2.0});
+		return node->child[dir];
+	}
 }
 
 vertex QuadTree::newCenter (int direction, QTNode* node)
@@ -55,27 +69,23 @@ void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 	if (node->leaf){
 		if (node->bucket.size() < maxBucketSize){
 			node->bucket.push_back (v);
-			if (node->bucket.size() >= maxBucketSize){
-				node->leaf = false;
-			}
 		}
-		else if (depth >= maxDepth){
+		else if (depth < maxDepth){
 			//node->bucket.push_back (v);
+			node->leaf = false;
+			insert (v, childNode (v, node), depth+1);
+			for (int i=0; i < node->bucket.size(); ++i){
+				insert (node->bucket[i], childNode(node->bucket[i], node), depth+1);
+			}
+			node->bucket.clear();
 		}
 	}
 
 	// no room in bucket, move down tree
 	else{
-		unsigned dir = direction (v, node);
+
+		insert (v, childNode (v, node), depth+1);
 		
-		if (node->child[dir]){
-			insert (v, node->child[dir], depth+1);
-		}
-		else{
-			node->child[dir] = new QTNode (newCenter (dir, node), 
-									{node->range.x/2.0, node->range.y/2.0});
-			insert (v, node->child[dir], depth+1);
-		}
 	}
 }
 
@@ -116,11 +126,32 @@ void QuadTree::draw ()
 
 void QuadTree::draw (QTNode* node)
 {
+	/*
 	glBegin (GL_LINE_LOOP);
 		glVertex2f (node->center.x + node->range.x, node->center.y + node->range.y);
 		glVertex2f (node->center.x + node->range.x, node->center.y - node->range.y);
 		glVertex2f (node->center.x - node->range.x, node->center.y - node->range.y);
 		glVertex2f (node->center.x - node->range.x, node->center.y + node->range.y);
+	glEnd();
+	*/
+	glBegin (GL_LINES);
+		glVertex2f (node->center.x, node->center.y);
+		glVertex2f (node->center.x + node->range.x, node->center.y + node->range.y);
+
+		glVertex2f (node->center.x, node->center.y);
+		glVertex2f (node->center.x + node->range.x, node->center.y - node->range.y);
+
+		glVertex2f (node->center.x, node->center.y);
+		glVertex2f (node->center.x - node->range.x, node->center.y - node->range.y);
+
+		glVertex2f (node->center.x, node->center.y);
+		glVertex2f (node->center.x - node->range.x, node->center.y + node->range.y);
+
+		for (int i=0; i < node->bucket.size(); ++i){
+			glVertex2f (node->center.x, node->center.y);
+			glVertex2f (node->bucket[i].x, node->bucket[i].y);
+		}
+
 	glEnd();
 
 	for (int i=0; i < 4; ++i){

@@ -16,6 +16,9 @@ using namespace std;
 
 static int height = 480;
 static int width = 480;
+static double ZOOM_INC = 64.0;
+static double PAN_INC = 64.0;
+
 
 static float graphXMin = -9;
 static float graphXMax = 9;
@@ -30,7 +33,7 @@ float pixToYCoord = graphYRange/height;
 vector <vertex> targetPoint;
 
 vertex origin (0, 0);
-vertex axis (8, 8);
+vertex axis (128.0, 128.0);
 
 QuadTree qtree(origin, axis);
 
@@ -101,28 +104,18 @@ long double randomFloat (){
 static void display(void)
 {
     glClear (GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-
-    /*
-    // x/y axis
-    glColor3f (1, 1, 1);
-    glBegin (GL_LINES);
-        glVertex2f (0, graphYMax);
-        glVertex2f (0, graphYMin);
-        glVertex2f (graphXMax, 0);
-        glVertex2f (graphXMin, 0);
-    glEnd();
-    */
     glColor3f (1, 1, 1);
     qtree.draw();
 
-    // target points
+    // target points 
     glColor3f (0, 0, 1);
-    glPointSize (6.0);
+    glPointSize (3.0);
     glBegin (GL_POINTS);
         for (unsigned i=0; i<targetPoint.size(); i++){
             glVertex2f (targetPoint[i].x, targetPoint[i].y);
         }
     glEnd();
+
 
     glFlush();
     glutSwapBuffers();
@@ -143,44 +136,43 @@ static void key(unsigned char key, int x, int y)
 
         case 'a':
         case 'A':
-            pan (graphXRange/16.0, 0);
+            pan (-graphXRange/PAN_INC, 0);
         break;
 
         case 'd':
         case 'D':
-            pan (-graphXRange/16.0, 0);
+            pan (graphXRange/PAN_INC, 0);
         break; 
 
         case 'w':
         case 'W':
-            pan (0, -graphYRange/16.0);
+            pan (0, graphYRange/PAN_INC);
         break; 
 
         case 's':
         case 'S':
-            pan (0, graphYRange/16.0);
+            pan (0, -graphYRange/PAN_INC);
+        break;
+
+        case 'r':
+        case 'R':
+            for (int i=0; i < 100; ++i){
+                vertex newpoint (  axis.x - ( 2 * axis.x * randomFloat()),
+                                   axis.y - ( 2 * axis.y * randomFloat()));
+                targetPoint.push_back(newpoint);
+                qtree.insert (newpoint);
+            }
         break;
 
         case '+':
         case '=':
-            zoom ( 1.0, 1.0);
+            zoom ( graphXRange/ZOOM_INC, graphYRange/ZOOM_INC );
         break; 
 
         case '-':
         case '_':
-            zoom ( -1.0, -1.0);
+            zoom ( -graphXRange/ZOOM_INC, -graphYRange/ZOOM_INC );
         break;        
-    }
-    glutPostRedisplay();
-}
-
-static void special(int key, int x, int y)
-{
-    switch (key){
-        case 'GLUT_KEY_LEFT':
-            pan (graphXRange/16.0, 0);
-        break;    
-
     }
     glutPostRedisplay();
 }
@@ -214,7 +206,6 @@ static void motion (int x, int y)
 
 static void idle(void)
 {
-
     glutPostRedisplay();
     //sleep (15);
 }
@@ -222,22 +213,6 @@ static void idle(void)
 int main(int argc, char *argv[])
 {
     srand (time (0));
-    ifstream fin;
-    cout << "Loading target points...";
-    fin.open(argv[1]);
-    if (!fin.fail()){
-        while (fin.good()){
-            long double newX, newY;
-            fin >> newX >> newY;
-            vertex newTargetPoint (newX, newY);
-            //targetPoint.push_back(newTargetPoint);
-        }
-        cout << "complete!\n";
-    }
-    else{
-        cout << "\nError: input file not found\n";
-    }
-
     glutInit(&argc, argv);
     glutInitWindowSize(width,height);
     glutInitWindowPosition(10,10);
@@ -246,7 +221,7 @@ int main(int argc, char *argv[])
     glutReshapeFunc(resize);
     glutDisplayFunc(display);
     glutKeyboardFunc(key);
-    glutSpecialFunc(special);
+    //glutSpecialFunc(special);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
     glutIdleFunc(idle);
