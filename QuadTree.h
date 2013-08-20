@@ -39,7 +39,7 @@ class QTNode{
 			range = newRange;
 			leaf = true;
 		}
-		~QTNode (){}
+		~QTNode (){ for (int i=0; i < 4; ++i) if (child[i]){delete child[i];}}
 
 		bool leaf;
 		QTNode* child[4];
@@ -54,7 +54,7 @@ class QuadTree
 {
 	public:
 
-		QuadTree (vertex center, vertex range);
+		QuadTree (vertex center, vertex range, unsigned bucketSize=1);
 		~QuadTree ();
 
 		void 	insert (vertex v);
@@ -70,6 +70,7 @@ class QuadTree
 		vertex 	newCenter (int direction, QTNode* node);
 		QTNode* childNode (vertex v, QTNode* node);
 		void 	insert (vertex v, QTNode* node, unsigned depth);
+		bool	remove (vertex v, QTNode* parent, QTNode* child);
 		void 	draw (QTNode* node);
 
 		QTNode* root;

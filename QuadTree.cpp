@@ -1,15 +1,15 @@
 #include "QuadTree.h"
 
-QuadTree::QuadTree (vertex center, vertex range)
+QuadTree::QuadTree (vertex center, vertex range, unsigned bucketSize)
 {
 	root = new QTNode(center, range);
-	maxDepth = 32;
-	maxBucketSize = 1;
+	maxDepth = 16;
+	maxBucketSize = bucketSize;
 }
 
 QuadTree::~QuadTree ()
 {
-
+	delete root;
 }
 
 void QuadTree::insert (vertex v)
@@ -71,7 +71,6 @@ void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 			node->bucket.push_back (v);
 		}
 		else if (depth < maxDepth){
-			//node->bucket.push_back (v);
 			node->leaf = false;
 			insert (v, childNode (v, node), depth+1);
 			for (int i=0; i < node->bucket.size(); ++i){
@@ -80,13 +79,36 @@ void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 			node->bucket.clear();
 		}
 	}
-
-	// no room in bucket, move down tree
 	else{
-
 		insert (v, childNode (v, node), depth+1);
-		
 	}
+}
+
+bool QuadTree::remove (vertex v)
+{
+	stack <QTNode*> nodes;
+	nodes.push (root);
+	QTNode* top = nodes.top();
+	unsigned dir;
+	while (!top->leaf){
+		dir = direction (v, top);
+		if (top->child[dir]){
+			nodes.push (top->child[dir]);
+			top = nodes.top();
+		}
+		else{
+			return false;
+		}
+	}	
+	for (int i=0; i < top->bucket.size(); ++i){
+		if (top->bucket[i] == v){
+			top->bucket.erase(top->bucket.begin()+i);
+			return true;
+		}
+		else{
+			return false;
+		}
+	}	
 }
 
 bool QuadTree::contains (vertex v)
@@ -135,6 +157,7 @@ void QuadTree::draw (QTNode* node)
 	glEnd();
 	*/
 	glBegin (GL_LINES);
+
 		glVertex2f (node->center.x, node->center.y);
 		glVertex2f (node->center.x + node->range.x, node->center.y + node->range.y);
 

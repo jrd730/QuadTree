@@ -17,4 +17,6 @@ class vertex
 
         long double x;
         long double y;
+
+        bool operator == (vertex v){ return ((x == v.x)&&(y==v.y)); }
 };
