@@ -19,22 +19,26 @@ void QuadTree::insert (vertex v)
 
 int QuadTree::direction (vertex point, QTNode* node)
 {
+	// get the quadrant that would contain the vertex
+	// in reference to a given start node
 	unsigned X=0, Y=0;
 	X |= ((point.x >= node->center.x)<<1);
 	Y |= ((point.y >= node->center.y)<<0);
-	return (X|Y);
+	return (X|Y); 
 }
 
 QTNode* QuadTree::childNode (vertex v, QTNode* node)
 {
+	// get the next node that would contain the vertex
+	// in reference to a given start node
 	unsigned dir = direction (v, node);
-		
 	if (node->child[dir]){
 		return node->child[dir];
 	}
+	// node not found, so create it 
 	else{
-		node->child[dir] = new QTNode (newCenter (dir, node), 
-								{node->range.x/2.0, node->range.y/2.0});
+		vertex r(node->range.x/2.0, node->range.y/2.0);
+		node->child[dir] = new QTNode (newCenter (dir, node), r);
 		return node->child[dir];
 	}
 }
@@ -65,11 +69,15 @@ vertex QuadTree::newCenter (int direction, QTNode* node)
 
 void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 {
-	// there is room in this node's bucket, or max depth has been reached
+	// by design, vertices are stored only in leaf nodes
+	// newly created nodes are leaf nodes by default
 	if (node->leaf){
+		// there is room in this node's bucket
 		if (node->bucket.size() < maxBucketSize){
 			node->bucket.push_back (v);
 		}
+		// bucket is full, so push all vertices to next depth,
+		// clear the current node's bucket and make it a stem
 		else if (depth < maxDepth){
 			node->leaf = false;
 			insert (v, childNode (v, node), depth+1);
@@ -79,10 +87,49 @@ void QuadTree::insert (vertex v, QTNode* node, unsigned depth)
 			node->bucket.clear();
 		}
 	}
+	// current node is a stem node used for navigation
 	else{
 		insert (v, childNode (v, node), depth+1);
 	}
 }
+
+void QuadTree::reduce (stack <QTNode*>& nodes)
+{
+	// once a vertex is removed from a leaf node's bucket
+	// check to see if that node's parent can consume it
+	// and all of it's sibling nodes
+	bool canReduce = true;
+	nodes.pop();
+	while (canReduce && !nodes.empty()) {
+		canReduce = true;
+		QTNode* top = nodes.top();
+		int numKeys = 0;
+		for (int i=0; i < 4; ++i){
+			if (top->child[i] && !top->child[i]->leaf){
+				canReduce = false;
+				return;
+			}
+			else if (top->child[i] && top->child[i]->leaf){
+				numKeys += top->child[i]->bucket.size();
+			}
+		}
+		canReduce &= (numKeys <= maxBucketSize);
+		if (canReduce){
+			for (int i=0; i < 4; ++i){
+				if (top->child[i]){
+					for (int j=0; j < top->child[i]->bucket.size(); ++j){
+						top->bucket.push_back ( top->child[i]->bucket[j] );
+					}
+					delete top->child[i];
+					top->child[i] = NULL;
+				}
+			}
+			top->leaf = true;
+		}
+		nodes.pop();
+	}
+	return;
+}	
 
 bool QuadTree::remove (vertex v)
 {
@@ -90,6 +137,8 @@ bool QuadTree::remove (vertex v)
 	nodes.push (root);
 	QTNode* top = nodes.top();
 	unsigned dir;
+
+	// navigate to leaf node containing the vertex to be deleted
 	while (!top->leaf){
 		dir = direction (v, top);
 		if (top->child[dir]){
@@ -100,9 +149,12 @@ bool QuadTree::remove (vertex v)
 			return false;
 		}
 	}	
+	// linearly search bucket for target vertex
 	for (int i=0; i < top->bucket.size(); ++i){
+		// vertex found, delete from bucket
 		if (top->bucket[i] == v){
 			top->bucket.erase(top->bucket.begin()+i);
+			reduce (nodes);
 			return true;
 		}
 		else{
@@ -133,10 +185,8 @@ void QuadTree::print (QTNode* node, stringstream& ss)
 						 << node->bucket[i].y << '}' << ' ';
 			}
 		}
-	}
-	
+	}	
 	return;
-
 }
 
 void QuadTree::draw ()

@@ -70,6 +70,7 @@ class QuadTree
 		vertex 	newCenter (int direction, QTNode* node);
 		QTNode* childNode (vertex v, QTNode* node);
 		void 	insert (vertex v, QTNode* node, unsigned depth);
+		void	reduce (stack <QTNode*>& node);
 		bool	remove (vertex v, QTNode* parent, QTNode* child);
 		void 	draw (QTNode* node);
 

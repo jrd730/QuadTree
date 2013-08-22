@@ -15,8 +15,8 @@ using namespace std;
 
 static int height = 480;
 static int width = 480;
-static double ZOOM_INC = 64.0;
-static double PAN_INC = 64.0;
+static double ZOOM_INC = 32.0;
+static double PAN_INC = 32.0;
 
 
 static float graphXMin = -9;
