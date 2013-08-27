@@ -8,7 +8,6 @@
 **/
 #include "Vertex.h"
 #include <cstdlib>
-#include <list>
 #include <sstream>
 #include <stack>
 #include <string>
@@ -62,6 +61,9 @@ class QuadTree
 		bool 	remove (vertex v);
 		void 	draw ();
 		string 	print ();
+		
+		//vector <vertex> getPointsInRegion ();
+		//vector <vertex> getPointsInRadius ();
 
 	private:
 

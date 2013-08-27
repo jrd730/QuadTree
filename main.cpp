@@ -220,12 +220,19 @@ static void motion (int x, int y)
 {
     vertex newpoint ( x*pixToXCoord + graphXMin,
                       -y*pixToYCoord + graphYMax);
+    
+    //qtree->remove (targetPoint.back());
+    //targetPoint.pop_back ();
+
     qtree->insert (newpoint);
     targetPoint.push_back(newpoint);
 }
 
 static void idle(void)
 {
+    if (going){
+
+    }
     glutPostRedisplay();
 }
 
