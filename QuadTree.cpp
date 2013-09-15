@@ -5,7 +5,7 @@
 template <typename T>
 QuadTree<T>::QuadTree (vertex center, vertex range, unsigned bucketSize)
 {
-	root = new QTNode(center, range);
+	root = new QTNode <T>(center, range);
 	maxDepth = 16;
 	maxBucketSize = bucketSize;
 }
@@ -23,7 +23,7 @@ void QuadTree<T>::insert (vertex v)
 }
 
 template <typename T>
-int QuadTree<T>::direction (const vertex& point, QTNode* node)
+int QuadTree<T>::direction (const vertex& point, QTNode<T>* node)
 {
 	// get the quadrant that would contain the vertex
 	// in reference to a given start node
@@ -34,7 +34,7 @@ int QuadTree<T>::direction (const vertex& point, QTNode* node)
 }
 
 template <typename T>
-QTNode* QuadTree<T>::childNode (const vertex& v, QTNode* node)
+QTNode<T>* QuadTree<T>::childNode (const vertex& v, QTNode<T>* node)
 {
 	// get the next node that would contain the vertex
 	// in reference to a given start node
@@ -45,13 +45,13 @@ QTNode* QuadTree<T>::childNode (const vertex& v, QTNode* node)
 	// node not found, so create it 
 	else{
 		vertex r(node->range.x/2.0, node->range.y/2.0);
-		node->child[dir] = new QTNode (newCenter (dir, node), r);
+		node->child[dir] = new QTNode<T>(newCenter (dir, node), r);
 		return node->child[dir];
 	}
 }
 
 template <typename T>
-vertex QuadTree<T>::newCenter (int direction, QTNode* node)
+vertex QuadTree<T>::newCenter (int direction, QTNode<T>* node)
 {
 	vertex v(node->center.x, node->center.y); 
 	switch (direction){
@@ -76,7 +76,7 @@ vertex QuadTree<T>::newCenter (int direction, QTNode* node)
 }
 
 template <typename T>
-void QuadTree<T>::insert (vertex v, QTNode* node, unsigned depth)
+void QuadTree<T>::insert (vertex v, QTNode<T>* node, unsigned depth)
 {
 	// by design, vertices are stored only in leaf nodes
 	// newly created nodes are leaf nodes by default
@@ -103,7 +103,7 @@ void QuadTree<T>::insert (vertex v, QTNode* node, unsigned depth)
 }
 
 template <typename T>
-void QuadTree<T>::reduce (stack <QTNode*>& nodes)
+void QuadTree<T>::reduce (stack <QTNode<T>*>& nodes)
 {
 	// once a vertex is removed from a leaf node's bucket
 	// check to see if that node's parent can consume it
@@ -112,7 +112,7 @@ void QuadTree<T>::reduce (stack <QTNode*>& nodes)
 	nodes.pop();
 	while (canReduce && !nodes.empty()) {
 		canReduce = true;
-		QTNode* top = nodes.top();
+		QTNode<T>* top = nodes.top();
 		int numKeys = 0;
 		for (int i=0; i < 4; ++i){
 			if (top->child[i] && !top->child[i]->leaf){
@@ -144,9 +144,9 @@ void QuadTree<T>::reduce (stack <QTNode*>& nodes)
 template <typename T>
 bool QuadTree<T>::remove (vertex v)
 {
-	stack <QTNode*> nodes;
+	stack <QTNode<T>*> nodes;
 	nodes.push (root);
-	QTNode* top = nodes.top();
+	QTNode<T>* top = nodes.top();
 	unsigned dir;
 
 	// navigate to leaf node containing the vertex to be deleted
@@ -189,7 +189,7 @@ string QuadTree<T>::print ()
 }
 
 template <typename T>
-void QuadTree<T>::print (QTNode* node, stringstream& ss)
+void QuadTree<T>::print (QTNode<T>* node, stringstream& ss)
 {
 	for (int i=0; i < 4; ++i){
 		if (node->child[i]){
@@ -212,7 +212,7 @@ void QuadTree<T>::draw ()
 }
 
 template <typename T>
-void QuadTree<T>::draw (QTNode* node)
+void QuadTree<T>::draw (QTNode<T>* node)
 {
 	/*
 	glBegin (GL_LINE_LOOP);

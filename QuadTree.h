@@ -10,7 +10,6 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 
-
 #include <cstdlib>
 #include <sstream>
 #include <stack>
@@ -52,16 +51,16 @@ class QuadTree
 
 	private:
 
-		void 	print (QTNode* node, stringstream& ss);
-		int 	direction (const vertex& point, QTNode* node);
-		vertex 	newCenter (int direction, QTNode* node);
-		QTNode* childNode (const vertex& v, QTNode* node);
-		void 	insert (vertex v, QTNode* node, unsigned depth);
-		void	reduce (stack <QTNode*>& node);
-		bool	remove (vertex v, QTNode* parent, QTNode* child);
-		void 	draw (QTNode* node);
+		void 	print (QTNode <T>* node, stringstream& ss);
+		int 	direction (const vertex& point, QTNode <T>* node);
+		vertex 	newCenter (int direction, QTNode <T>* node);
+		QTNode<T>* childNode (const vertex& v, QTNode<T>* node);
+		void 	insert (vertex v, QTNode<T>* node, unsigned depth);
+		void	reduce (stack <QTNode<T>*>& node);
+		bool	remove (vertex v, QTNode<T>* parent, QTNode<T>* child);
+		void 	draw (QTNode<T>* node);
 
-		QTNode* root;
+		QTNode<T>* root;
 
 		unsigned maxDepth,
 			maxBucketSize;
