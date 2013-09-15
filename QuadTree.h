@@ -6,7 +6,11 @@
 	Quadtree: a dynamic 2d space partitioning structure
 
 **/
-#include "Vertex.h"
+
+#ifndef QUADTREE_H
+#define QUADTREE_H
+
+
 #include <cstdlib>
 #include <sstream>
 #include <stack>
@@ -18,6 +22,10 @@
 #include <GL/glut.h>
 #endif
 #include <stdlib.h>
+
+#include "QTNode.h"
+#include "Vertex.h"
+
 using namespace std;
 
 #define LOWER_LEFT_QUAD 0
@@ -25,35 +33,12 @@ using namespace std;
 #define LOWER_RIGHT_QUAD 2
 #define UPPER_RIGHT_QUAD 3
 
-class QTNode{
-	
-	public:
-		
-		QTNode (vertex newCenter, vertex newRange) { 
-			child[0] = NULL;
-			child[1] = NULL;
-			child[2] = NULL; 
-			child[3] = NULL;
-			center = newCenter;
-			range = newRange;
-			leaf = true;
-		}
-		~QTNode (){ for (int i=0; i < 4; ++i) if (child[i]){delete child[i];}}
-
-		bool leaf;
-		QTNode* child[4];
-		vertex center, range;
-		vector <vertex> bucket;
-	
-	private:
-		
-};
-
+template <typename T>
 class QuadTree
 {
 	public:
 
-		QuadTree (vertex center, vertex range, unsigned bucketSize=1);
+		QuadTree <T>(vertex center, vertex range, unsigned bucketSize=1);
 		~QuadTree ();
 
 		void 	insert (vertex v);
@@ -68,9 +53,9 @@ class QuadTree
 	private:
 
 		void 	print (QTNode* node, stringstream& ss);
-		int 	direction (vertex point, QTNode* node);
+		int 	direction (const vertex& point, QTNode* node);
 		vertex 	newCenter (int direction, QTNode* node);
-		QTNode* childNode (vertex v, QTNode* node);
+		QTNode* childNode (const vertex& v, QTNode* node);
 		void 	insert (vertex v, QTNode* node, unsigned depth);
 		void	reduce (stack <QTNode*>& node);
 		bool	remove (vertex v, QTNode* parent, QTNode* child);
@@ -83,3 +68,7 @@ class QuadTree
 
 
 };
+
+
+#include "QuadTree.cpp"
+#endif //#ifdef QUADTREE_H

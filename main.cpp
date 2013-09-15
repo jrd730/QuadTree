@@ -18,7 +18,6 @@ static int width = 480;
 static double ZOOM_INC = 32.0;
 static double PAN_INC = 32.0;
 
-
 static float graphXMin = -9;
 static float graphXMax = 9;
 float graphXRange = graphXMax - graphXMin;
@@ -34,7 +33,7 @@ vector <vertex> targetPoint;
 vertex origin (0, 0);
 vertex axis (128.0, 128.0);
 static int bucketSize = 1;
-QuadTree* qtree;
+QuadTree <int>* qtree;
 
 bool going (false);
 
@@ -83,7 +82,6 @@ void zoom (double xAmount, double yAmount)
     graphYMax += yAmount;
 
     initializeViewMatrix ();
-
     glMatrixMode (GL_PROJECTION);
     glLoadIdentity ();
     gluOrtho2D (graphXMin, graphXMax, graphYMin, graphYMax);
@@ -167,7 +165,7 @@ static void key(unsigned char key, int x, int y)
         case 'b':
             delete qtree;
             bucketSize--;
-            qtree = new QuadTree (origin, axis, bucketSize);
+            qtree = new QuadTree <int> (origin, axis, bucketSize);
             for (int i=0; i < targetPoint.size(); ++i){
                 qtree->insert (targetPoint[i]);
             }
@@ -176,7 +174,7 @@ static void key(unsigned char key, int x, int y)
         case 'B':
             delete qtree;
             bucketSize++;
-            qtree = new QuadTree (origin, axis, bucketSize);
+            qtree = new QuadTree <int> (origin, axis, bucketSize);
             for (int i=0; i < targetPoint.size(); ++i){
                 qtree->insert (targetPoint[i]);
             }
@@ -184,7 +182,7 @@ static void key(unsigned char key, int x, int y)
 
         case '~':
             delete qtree;
-            qtree = new QuadTree (origin, axis, bucketSize);
+            qtree = new QuadTree <int> (origin, axis, bucketSize);
             targetPoint.clear ();
             
         break;
@@ -239,7 +237,7 @@ static void idle(void)
 int main(int argc, char *argv[])
 {
     srand (time (0));
-    qtree = new QuadTree (origin, axis, 1);
+    qtree = new QuadTree <int> (origin, axis, 1);
     glutInit(&argc, argv);
     glutInitWindowSize(width,height);
     glutInitWindowPosition(10,10);
