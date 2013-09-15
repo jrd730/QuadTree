@@ -1,4 +1,5 @@
 
+#include <cstdlib>
 #include <vector>
 #include "Vertex.h"
 using namespace std;
@@ -8,7 +9,7 @@ class QTNode{
 	
 	public:
 		
-		QTNode <T>(vertex newCenter, vertex newRange) { 
+		QTNode <T>(vertex newCenter, vertex newRange){ 
 			child[0] = NULL;
 			child[1] = NULL;
 			child[2] = NULL; 
@@ -22,8 +23,7 @@ class QTNode{
 		bool leaf;
 		QTNode* child[4];
 		vertex center, range;
-		vector <vertex> bucket;
-	
-	private:
+		vector <pair <vertex, T> > bucket;
+		T data;
 		
 };

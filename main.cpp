@@ -158,7 +158,7 @@ static void key(unsigned char key, int x, int y)
                 vertex newpoint (  axis.x - ( 2 * axis.x * randomFloat()),
                                    axis.y - ( 2 * axis.y * randomFloat()));
                 targetPoint.push_back(newpoint);
-                qtree->insert (newpoint);
+                qtree->insert (newpoint, 1);
             }
         break;
 
@@ -167,7 +167,7 @@ static void key(unsigned char key, int x, int y)
             bucketSize--;
             qtree = new QuadTree <int> (origin, axis, bucketSize);
             for (int i=0; i < targetPoint.size(); ++i){
-                qtree->insert (targetPoint[i]);
+                qtree->insert (targetPoint[i], 1);
             }
         break;
 
@@ -176,7 +176,7 @@ static void key(unsigned char key, int x, int y)
             bucketSize++;
             qtree = new QuadTree <int> (origin, axis, bucketSize);
             for (int i=0; i < targetPoint.size(); ++i){
-                qtree->insert (targetPoint[i]);
+                qtree->insert (targetPoint[i], 1);
             }
         break;
 
@@ -208,7 +208,7 @@ static void mouse (int button, int state, int x, int y)
                 vertex newpoint ( x*pixToXCoord + graphXMin,
                                   -y*pixToYCoord + graphYMax);
                 targetPoint.push_back(newpoint);
-                qtree->insert (newpoint);
+                qtree->insert (newpoint, 1);
             }
         break;
     }
@@ -222,8 +222,8 @@ static void motion (int x, int y)
     //qtree->remove (targetPoint.back());
     //targetPoint.pop_back ();
 
-    qtree->insert (newpoint);
     targetPoint.push_back(newpoint);
+    qtree->insert (newpoint, 1);
 }
 
 static void idle(void)

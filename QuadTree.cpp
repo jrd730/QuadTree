@@ -17,9 +17,9 @@ QuadTree<T>::~QuadTree ()
 }
 
 template <typename T>
-void QuadTree<T>::insert (vertex v)
+void QuadTree<T>::insert (vertex v, T data)
 {
-	insert (v, root, 0);
+	insert (v, data, root, 0);
 }
 
 template <typename T>
@@ -76,29 +76,29 @@ vertex QuadTree<T>::newCenter (int direction, QTNode<T>* node)
 }
 
 template <typename T>
-void QuadTree<T>::insert (vertex v, QTNode<T>* node, unsigned depth)
+void QuadTree<T>::insert (vertex v, T data, QTNode<T>* node, unsigned depth)
 {
 	// by design, vertices are stored only in leaf nodes
 	// newly created nodes are leaf nodes by default
 	if (node->leaf){
 		// there is room in this node's bucket
 		if (node->bucket.size() < maxBucketSize){
-			node->bucket.push_back (v);
+			node->bucket.push_back ({v, data});
 		}
 		// bucket is full, so push all vertices to next depth,
 		// clear the current node's bucket and make it a stem
 		else if (depth < maxDepth){
 			node->leaf = false;
-			insert (v, childNode (v, node), depth+1);
+			insert (v, data, childNode (v, node), depth+1);
 			for (int i=0; i < node->bucket.size(); ++i){
-				insert (node->bucket[i], childNode(node->bucket[i], node), depth+1);
+				insert (node->bucket[i].first, data, childNode(node->bucket[i].first, node), depth+1);
 			}
 			node->bucket.clear();
 		}
 	}
 	// current node is a stem node used for navigation
 	else{
-		insert (v, childNode (v, node), depth+1);
+		insert (v, data, childNode (v, node), depth+1);
 	}
 }
 
@@ -163,7 +163,7 @@ bool QuadTree<T>::remove (vertex v)
 	// linearly search bucket for target vertex
 	for (int i=0; i < top->bucket.size(); ++i){
 		// vertex found, delete from bucket
-		if (top->bucket[i] == v){
+		if (top->bucket[i].first == v){
 			top->bucket.erase(top->bucket.begin()+i);
 			reduce (nodes);
 			return true;
@@ -195,8 +195,8 @@ void QuadTree<T>::print (QTNode<T>* node, stringstream& ss)
 		if (node->child[i]){
 			print (node->child[i], ss);
 			for (int i = 0; i < node->bucket.size(); i++){
-				ss << '{' << node->bucket[i].x << ','
-						 << node->bucket[i].y << '}' << ' ';
+				ss << '{' << node->bucket[i].first.x << ','
+						 << node->bucket[i].first.y << '}' << ' ';
 			}
 		}
 	}	
@@ -238,7 +238,7 @@ void QuadTree<T>::draw (QTNode<T>* node)
 
 		for (int i=0; i < node->bucket.size(); ++i){
 			glVertex2f (node->center.x, node->center.y);
-			glVertex2f (node->bucket[i].x, node->bucket[i].y);
+			glVertex2f (node->bucket[i].first.x, node->bucket[i].first.y);
 		}
 
 	glEnd();
