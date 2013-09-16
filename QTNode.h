@@ -20,10 +20,13 @@ class QTNode{
 		}
 		~QTNode (){ for (int i=0; i < 4; ++i) if (child[i]){delete child[i];}}
 
+		vertex center, range;
+
+		// used by stem nodes
 		bool leaf;
 		QTNode* child[4];
-		vertex center, range;
+		
+		// used by leaf nodes
 		vector <pair <vertex, T> > bucket;
-		T data;
 		
 };

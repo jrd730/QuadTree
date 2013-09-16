@@ -1,5 +1,5 @@
 CXX = g++
-CPPFLAGS = -g
+CPPFLAGS = -g -w
 
 # uncomment the lines for the machine you are compiling on
 # comment out the lines for the other two machines

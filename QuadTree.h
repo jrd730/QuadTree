@@ -46,8 +46,7 @@ class QuadTree
 		void 	draw ();
 		string 	print ();
 		
-		//vector <vertex> getPointsInRegion ();
-		//vector <vertex> getPointsInRadius ();
+		vector <pair <vertex, T> >& getObjectsInRegion (vertex minXY, vertex maxXY);
 
 	private:
 
@@ -57,7 +56,6 @@ class QuadTree
 		QTNode<T>* childNode (const vertex& v, QTNode<T>* node);
 		void 	insert (vertex v, T data, QTNode<T>* node, unsigned depth);
 		void	reduce (stack <QTNode<T>*>& node);
-		bool	remove (vertex v, QTNode<T>* parent, QTNode<T>* child);
 		void 	draw (QTNode<T>* node);
 
 		QTNode<T>* root;

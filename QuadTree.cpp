@@ -212,6 +212,12 @@ void QuadTree<T>::draw ()
 }
 
 template <typename T>
+vector <pair <vertex, T> >& QuadTree<T>::getObjectsInRegion (vertex minXY, vertex maxXY)
+{
+	vector <pair <vertex, T> >& results;
+}
+
+template <typename T>
 void QuadTree<T>::draw (QTNode<T>* node)
 {
 	/*

@@ -212,25 +212,16 @@ static void mouse (int button, int state, int x, int y)
             }
         break;
     }
+    glutPostRedisplay();
 }
 
 static void motion (int x, int y)
 {
     vertex newpoint ( x*pixToXCoord + graphXMin,
                       -y*pixToYCoord + graphYMax);
-    
-    //qtree->remove (targetPoint.back());
-    //targetPoint.pop_back ();
 
     targetPoint.push_back(newpoint);
     qtree->insert (newpoint, 1);
-}
-
-static void idle(void)
-{
-    if (going){
-
-    }
     glutPostRedisplay();
 }
 
@@ -248,7 +239,6 @@ int main(int argc, char *argv[])
     glutKeyboardFunc(key);
     glutMouseFunc(mouse);
     glutMotionFunc(motion);
-    glutIdleFunc(idle);
     glClearColor(0,0,0,0);
     glutMainLoop();
     return EXIT_SUCCESS;
