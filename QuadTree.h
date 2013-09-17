@@ -11,6 +11,7 @@
 #define QUADTREE_H
 
 #include <cstdlib>
+#include <queue>
 #include <sstream>
 #include <stack>
 #include <string>
@@ -32,6 +33,12 @@ using namespace std;
 #define LOWER_RIGHT_QUAD 2
 #define UPPER_RIGHT_QUAD 3
 
+enum enclosure_status{
+	 NODE_NOT_IN_REGION,
+	 NODE_PARTIALLY_IN_REGION,
+	 NODE_CONTAINED_BY_REGION
+};
+
 template <typename T>
 class QuadTree
 {
@@ -46,7 +53,7 @@ class QuadTree
 		void 	draw ();
 		string 	print ();
 		
-		vector <pair <vertex, T> >& getObjectsInRegion (vertex minXY, vertex maxXY);
+		vector <pair <vertex, T> > getObjectsInRegion (vertex minXY, vertex maxXY);
 
 	private:
 
@@ -57,6 +64,9 @@ class QuadTree
 		void 	insert (vertex v, T data, QTNode<T>* node, unsigned depth);
 		void	reduce (stack <QTNode<T>*>& node);
 		void 	draw (QTNode<T>* node);
+		bool	pointInRegion (const vertex& point, const vertex& minXY, const vertex& maxXY);
+		enclosure_status getEnclosureStatus (QTNode<T>* node, const vertex& minXY, const vertex& maxXY);
+
 
 		QTNode<T>* root;
 

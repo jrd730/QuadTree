@@ -29,6 +29,7 @@ float graphYRange = graphYMax - graphYMin;
 float pixToYCoord = graphYRange/height;
 
 vector <vertex> targetPoint;
+vector <vertex> foundPoint;
 
 vertex origin (0, 0);
 vertex axis (128.0, 128.0);
@@ -106,11 +107,27 @@ static void display(void)
     glColor3f (0, 0, 1);
     glPointSize (3.0);
     glBegin (GL_POINTS);
-        for (unsigned i=0; i<targetPoint.size(); i++){
+        for (unsigned i=0; i<targetPoint.size(); ++i){
             glVertex2f (targetPoint[i].x, targetPoint[i].y);
         }
     glEnd();
 
+    glColor3f (0, 1, 0);
+    glBegin (GL_LINE_LOOP);
+        glVertex2f (0, 0);
+        glVertex2f (0, 25.0);
+        glVertex2f (25.0, 25.0);
+        glVertex2f (25.0, 0);
+    glEnd();
+
+    // found points 
+    glColor3f (0, 1, 0);
+    glPointSize (3.0);
+    glBegin (GL_POINTS);
+        for (unsigned i=0; i<foundPoint.size(); ++i){
+            glVertex2f (foundPoint[i].x, foundPoint[i].y);
+        }
+    glEnd();
 
     glFlush();
     glutSwapBuffers();
@@ -195,7 +212,19 @@ static void key(unsigned char key, int x, int y)
         case '-':
         case '_':
             zoom ( -graphXRange/ZOOM_INC, -graphYRange/ZOOM_INC );
-        break;        
+        break;
+
+        case 'f':
+            vector <pair <vertex, int> > found;
+            found = qtree->getObjectsInRegion ({0, 0}, {25, 25});
+
+            foundPoint.clear();
+            foundPoint.resize(found.size());
+
+            for (int i=0; i < found.size(); ++i){
+                foundPoint[i] = found[i].first;
+            }
+        break;
     }
     glutPostRedisplay();
 }

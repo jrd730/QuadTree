@@ -103,6 +103,39 @@ void QuadTree<T>::insert (vertex v, T data, QTNode<T>* node, unsigned depth)
 }
 
 template <typename T>
+bool QuadTree<T>::remove (vertex v)
+{
+	stack <QTNode<T>*> nodes;
+	nodes.push (root);
+	QTNode<T>* top = nodes.top();
+	unsigned dir;
+
+	// navigate to leaf node containing the vertex to be deleted
+	while (!top->leaf){
+		dir = direction (v, top);
+		if (top->child[dir]){
+			nodes.push (top->child[dir]);
+			top = nodes.top();
+		}
+		else{
+			return false;
+		}
+	}	
+	// linearly search bucket for target vertex
+	for (int i=0; i < top->bucket.size(); ++i){
+		// vertex found, delete from bucket
+		if (top->bucket[i].first == v){
+			top->bucket.erase(top->bucket.begin()+i);
+			reduce (nodes);
+			return true;
+		}
+		else{
+			return false;
+		}
+	}	
+}
+
+template <typename T>
 void QuadTree<T>::reduce (stack <QTNode<T>*>& nodes)
 {
 	// once a vertex is removed from a leaf node's bucket
@@ -142,39 +175,6 @@ void QuadTree<T>::reduce (stack <QTNode<T>*>& nodes)
 }	
 
 template <typename T>
-bool QuadTree<T>::remove (vertex v)
-{
-	stack <QTNode<T>*> nodes;
-	nodes.push (root);
-	QTNode<T>* top = nodes.top();
-	unsigned dir;
-
-	// navigate to leaf node containing the vertex to be deleted
-	while (!top->leaf){
-		dir = direction (v, top);
-		if (top->child[dir]){
-			nodes.push (top->child[dir]);
-			top = nodes.top();
-		}
-		else{
-			return false;
-		}
-	}	
-	// linearly search bucket for target vertex
-	for (int i=0; i < top->bucket.size(); ++i){
-		// vertex found, delete from bucket
-		if (top->bucket[i].first == v){
-			top->bucket.erase(top->bucket.begin()+i);
-			reduce (nodes);
-			return true;
-		}
-		else{
-			return false;
-		}
-	}	
-}
-
-template <typename T>
 bool QuadTree<T>::contains (vertex v)
 {
 	return false;
@@ -204,17 +204,94 @@ void QuadTree<T>::print (QTNode<T>* node, stringstream& ss)
 }
 
 template <typename T>
+vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex maxXY)
+{
+	vector <pair <vertex, T> > results;
+	queue <QTNode<T>*> nodes;
+	nodes.push (root);
+	
+	while (!nodes.empty()){
+		QTNode<T>* top = nodes.front();
+		// check if this leaf node has points in the region
+		if (top->leaf){
+			enclosure_status status = getEnclosureStatus(top, minXY, maxXY);
+			// this node is fully enclosed by the region
+			if (status == NODE_CONTAINED_BY_REGION){
+				// add all elements to results
+				for (int i=0; i < top->bucket.size(); ++i){
+					results.push_back (top->bucket[i]);
+				}
+			}
+
+			// this node is partially enclosed by the region
+			else if (status == NODE_PARTIALLY_IN_REGION){
+				// search through this leaf node's bucket
+				for (int i=0; i < top->bucket.size(); ++i){
+					// check if this point is in the region
+					if (pointInRegion(top->bucket[i].first, minXY, maxXY)){
+						results.push_back (top->bucket[i]);
+					}
+				}
+			}
+
+			// this node definitely has no points in the region
+			else if (status == NODE_NOT_IN_REGION){
+				// do nothing
+			}
+		}
+		else{
+			for (int i=0; i < 4; ++i){
+				if (top->child[i]){
+					// check if this nodes children could have points in the region
+					enclosure_status status = getEnclosureStatus (top->child[i], minXY, maxXY);
+					if ( (status == NODE_PARTIALLY_IN_REGION) || (status == NODE_CONTAINED_BY_REGION) ){
+						nodes.push (top->child[i]);
+					}
+				}
+			}
+		}
+		nodes.pop();
+	}
+	return results;
+}
+
+template <typename T>
+bool QuadTree<T>::pointInRegion (const vertex& point, const vertex& minXY, const vertex& maxXY)
+{
+	if ( (point.x >= minXY.x) && (point.x < maxXY.x) && (point.y >= minXY.y) && (point.y < maxXY.y) ) {
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+
+template <typename T>
+enclosure_status QuadTree<T>::getEnclosureStatus (QTNode<T>* node, const vertex& minXY, const vertex& maxXY)
+{
+	int enclosedPts = 0;
+	enclosedPts += pointInRegion ({node->center.x-node->range.x, node->center.y-node->range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({node->center.x-node->range.x, node->center.y+node->range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({node->center.x+node->range.x, node->center.y-node->range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({node->center.x+node->range.x, node->center.y+node->range.y}, minXY, maxXY);
+	
+	if (enclosedPts == 4){
+		return NODE_CONTAINED_BY_REGION;
+	}
+	else if (enclosedPts > 0){
+		return NODE_PARTIALLY_IN_REGION;
+	}
+	else {
+		return NODE_NOT_IN_REGION;	
+	}
+}
+
+template <typename T>
 void QuadTree<T>::draw ()
 {
 	if (root){
 		draw (root);
 	}
-}
-
-template <typename T>
-vector <pair <vertex, T> >& QuadTree<T>::getObjectsInRegion (vertex minXY, vertex maxXY)
-{
-	vector <pair <vertex, T> >& results;
 }
 
 template <typename T>
