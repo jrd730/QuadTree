@@ -247,10 +247,10 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 					// check if this nodes children could have points in the region
 					enclosure_status status = getEnclosureStatus (top->child[i], minXY, maxXY);
 
-					// this node is completely contained by region, add all points within
 					switch (status){
+						// this node is completely contained by region, add all points within
 						case NODE_CONTAINED_BY_REGION:
-							addAllPointsToResults (top, results);
+							addAllPointsToResults (top->child[i], results);
 						break;
 
 						// this node might contain points in the region
@@ -258,6 +258,7 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 							nodes.push (top->child[i]);	
 						break;
 
+						// no points in region, discontinue searching this branch
 						case NODE_NOT_IN_REGION:
 						break;
 					}

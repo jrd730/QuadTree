@@ -201,7 +201,7 @@ static void key(unsigned char key, int x, int y)
             delete qtree;
             qtree = new QuadTree <int> (origin, axis, bucketSize);
             targetPoint.clear ();
-            
+            foundPoint.clear ();            
         break;
 
         case '+':
