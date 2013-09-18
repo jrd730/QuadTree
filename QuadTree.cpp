@@ -247,7 +247,6 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 						// this node is completely contained by region, add all points within
 						case NODE_CONTAINED_BY_REGION:
 							addAllPointsToResults (top->child[i], results);
-							//nodes.push (top->child[i]);	
 						break;
 
 						// this node might contain points in the region
@@ -311,9 +310,9 @@ enclosure_status QuadTree<T>::getEnclosureStatus (const vertex& center, const ve
 	else {
 		vertex nodeMin (center.x-range.x, center.y-range.y);
 		vertex nodeMax (center.x+range.x, center.y+range.y);
-		enclosedPts += pointInRegion ({minXY.x, minXY.y}, nodeMin, nodeMax);
+		enclosedPts += pointInRegion (minXY, nodeMin, nodeMax);
 		enclosedPts += pointInRegion ({minXY.x, maxXY.y}, nodeMin, nodeMax);
-		enclosedPts += pointInRegion ({maxXY.x, maxXY.y}, nodeMin, nodeMax);
+		enclosedPts += pointInRegion (maxXY, nodeMin, nodeMax);
 		enclosedPts += pointInRegion ({maxXY.x, minXY.y}, nodeMin, nodeMax);
 		if (enclosedPts > 0){
 			return NODE_PARTIALLY_IN_REGION;
