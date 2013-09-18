@@ -216,27 +216,29 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 		if (top->leaf){
 			enclosure_status status = getEnclosureStatus(top, minXY, maxXY);
 			// this node is fully enclosed by the region
-			if (status == NODE_CONTAINED_BY_REGION){
-				// add all elements to results
-				for (int i=0; i < top->bucket.size(); ++i){
-					results.push_back (top->bucket[i]);
-				}
-			}
+			switch (status)
+			{
+				// this node is completely contained within the search region
+				case NODE_CONTAINED_BY_REGION:
+					// add all elements to results
+					results.insert (results.end(), top->bucket.begin(), top->bucket.end());
+				break;
 
-			// this node is partially enclosed by the region
-			else if (status == NODE_PARTIALLY_IN_REGION){
-				// search through this leaf node's bucket
-				for (int i=0; i < top->bucket.size(); ++i){
-					// check if this point is in the region
-					if (pointInRegion(top->bucket[i].first, minXY, maxXY)){
-						results.push_back (top->bucket[i]);
+				// this node is partially contained by the region
+				case  NODE_PARTIALLY_IN_REGION:
+					// search through this leaf node's bucket
+					for (int i=0; i < top->bucket.size(); ++i){
+						// check if this point is in the region
+						if (pointInRegion(top->bucket[i].first, minXY, maxXY)){
+							results.push_back (top->bucket[i]);
+						}
 					}
-				}
-			}
+				break;
 
-			// this node definitely has no points in the region
-			else if (status == NODE_NOT_IN_REGION){
-				// do nothing
+				// this node definitely has no points in the region
+				case NODE_NOT_IN_REGION:
+					// do nothing
+				break;
 			}
 		}
 		else{
@@ -244,8 +246,20 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 				if (top->child[i]){
 					// check if this nodes children could have points in the region
 					enclosure_status status = getEnclosureStatus (top->child[i], minXY, maxXY);
-					if ( (status == NODE_PARTIALLY_IN_REGION) || (status == NODE_CONTAINED_BY_REGION) ){
-						nodes.push (top->child[i]);
+
+					// this node is completely contained by region, add all points within
+					switch (status){
+						case NODE_CONTAINED_BY_REGION:
+							addAllPointsToResults (top, results);
+						break;
+
+						// this node might contain points in the region
+						case NODE_PARTIALLY_IN_REGION:
+							nodes.push (top->child[i]);	
+						break;
+
+						case NODE_NOT_IN_REGION:
+						break;
 					}
 				}
 			}
@@ -253,6 +267,21 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 		nodes.pop();
 	}
 	return results;
+}
+
+template <typename T>
+void QuadTree<T>::addAllPointsToResults (QTNode<T>* node, vector <pair <vertex, T> >& results)
+{
+	if (node->leaf){
+		results.insert (results.end(), node->bucket.begin(), node->bucket.end());
+	}
+	else{
+		for (int i=0; i < 4; ++i){
+			if (node->child[i]){
+				addAllPointsToResults (node->child[i], results);
+			}
+		}
+	}
 }
 
 template <typename T>

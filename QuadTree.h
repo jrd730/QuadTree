@@ -64,6 +64,7 @@ class QuadTree
 		void 	insert (vertex v, T data, QTNode<T>* node, unsigned depth);
 		void	reduce (stack <QTNode<T>*>& node);
 		void 	draw (QTNode<T>* node);
+		void	addAllPointsToResults (QTNode<T>* node, vector <pair <vertex, T> >& results);
 		bool	pointInRegion (const vertex& point, const vertex& minXY, const vertex& maxXY);
 		enclosure_status getEnclosureStatus (QTNode<T>* node, const vertex& minXY, const vertex& maxXY);
 
