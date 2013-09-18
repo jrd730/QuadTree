@@ -103,7 +103,7 @@ long double randomFloat (){
 
 static void findPoints ()
 {
-	vector <pair <vertex, int> > found;
+  vector <pair <vertex, int> > found;
   found = qtree->getObjectsInRegion (
       {squareCenter.x-squareRange.x, squareCenter.y-squareRange.y}, 
       {squareCenter.x+squareRange.x, squareCenter.y+squareRange.y});
@@ -123,6 +123,7 @@ static void display(void)
     
     qtree->draw(); 
 
+    /*
     // target points 
     glColor3f (0, 0, 1);
     glPointSize (3.0);
@@ -131,6 +132,7 @@ static void display(void)
             glVertex2f (targetPoint[i].x, targetPoint[i].y);
         }
     glEnd();
+    */
 
     glColor3f (0, 1, 0);
     glBegin (GL_LINE_LOOP);
@@ -162,6 +164,13 @@ static void key(unsigned char key, int x, int y)
                 qtree->remove (targetPoint[i]);
             }
             targetPoint.clear();
+        break;
+
+        case 'k':
+            for (int i=0; i < foundPoint.size(); ++i){
+                qtree->remove (foundPoint[i]);
+            }
+            foundPoint.clear();
         break;
 
         case 'p':

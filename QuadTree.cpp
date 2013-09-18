@@ -3,10 +3,10 @@
 #include "QuadTree.h"
 
 template <typename T>
-QuadTree<T>::QuadTree (vertex center, vertex range, unsigned bucketSize)
+QuadTree<T>::QuadTree (vertex center, vertex range, unsigned bucketSize, unsigned depth)
 {
 	root = new QTNode <T>(center, range);
-	maxDepth = 16;
+	maxDepth = depth;
 	maxBucketSize = bucketSize;
 }
 

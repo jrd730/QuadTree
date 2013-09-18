@@ -33,7 +33,8 @@ using namespace std;
 #define LOWER_RIGHT_QUAD 2
 #define UPPER_RIGHT_QUAD 3
 
-enum enclosure_status{
+enum enclosure_status
+{
 	 NODE_NOT_IN_REGION,
 	 NODE_PARTIALLY_IN_REGION,
 	 NODE_CONTAINED_BY_REGION
@@ -44,7 +45,7 @@ class QuadTree
 {
 	public:
 
-		QuadTree <T>(vertex center, vertex range, unsigned bucketSize=1);
+		QuadTree <T>(vertex center, vertex range, unsigned bucketSize=1, unsigned depth = 16);
 		~QuadTree ();
 
 		void 	insert (vertex v, T data);
@@ -52,29 +53,23 @@ class QuadTree
 		bool 	remove (vertex v);
 		void 	draw ();
 		string 	print ();
-		
 		vector <pair <vertex, T> > getObjectsInRegion (vertex minXY, vertex maxXY);
 
 	private:
 
-		void 	print (QTNode <T>* node, stringstream& ss);
-		int 	direction (const vertex& point, QTNode <T>* node);
-		vertex 	newCenter (int direction, QTNode <T>* node);
 		QTNode<T>* childNode (const vertex& v, QTNode<T>* node);
+		vertex 	newCenter (int direction, QTNode <T>* node);
+		int 	direction (const vertex& point, QTNode <T>* node);
 		void 	insert (vertex v, T data, QTNode<T>* node, unsigned depth);
 		void	reduce (stack <QTNode<T>*>& node);
 		void 	draw (QTNode<T>* node);
+		void 	print (QTNode <T>* node, stringstream& ss);
 		void	addAllPointsToResults (QTNode<T>* node, vector <pair <vertex, T> >& results);
 		bool	pointInRegion (const vertex& point, const vertex& minXY, const vertex& maxXY);
 		enclosure_status getEnclosureStatus (const vertex& center, const vertex& range, const vertex& minXY, const vertex& maxXY);
 
-
 		QTNode<T>* root;
-
-		unsigned maxDepth,
-			maxBucketSize;
-
-
+		unsigned maxDepth, maxBucketSize;
 };
 
 
