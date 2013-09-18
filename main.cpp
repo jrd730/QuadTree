@@ -28,8 +28,14 @@ static float graphYMax = 9;
 float graphYRange = graphYMax - graphYMin;
 float pixToYCoord = graphYRange/height;
 
+static bool leftMouseDown = 0;
+static bool rightMouseDown = 0;
+
 vector <vertex> targetPoint;
 vector <vertex> foundPoint;
+
+vertex squareCenter (0, 0);
+vertex squareRange (10, 10);
 
 vertex origin (0, 0);
 vertex axis (128.0, 128.0);
@@ -95,6 +101,20 @@ long double randomFloat (){
     return x;
 }
 
+static void findPoints ()
+{
+	vector <pair <vertex, int> > found;
+  found = qtree->getObjectsInRegion (
+      {squareCenter.x-squareRange.x, squareCenter.y-squareRange.y}, 
+      {squareCenter.x+squareRange.x, squareCenter.y+squareRange.y});
+
+  foundPoint.clear();
+  foundPoint.resize(found.size());
+
+  for (int i=0; i < found.size(); ++i){
+      foundPoint[i] = found[i].first;
+  }
+}
 
 static void display(void)
 {
@@ -114,10 +134,10 @@ static void display(void)
 
     glColor3f (0, 1, 0);
     glBegin (GL_LINE_LOOP);
-        glVertex2f (0, 0);
-        glVertex2f (0, 25.0);
-        glVertex2f (25.0, 25.0);
-        glVertex2f (25.0, 0);
+        glVertex2f (squareCenter.x-squareRange.x, squareCenter.y-squareRange.y);
+        glVertex2f (squareCenter.x-squareRange.x, squareCenter.y+squareRange.y);
+        glVertex2f (squareCenter.x+squareRange.x, squareCenter.y+squareRange.y);
+        glVertex2f (squareCenter.x+squareRange.x, squareCenter.y-squareRange.y);
     glEnd();
 
     // found points 
@@ -215,15 +235,7 @@ static void key(unsigned char key, int x, int y)
         break;
 
         case 'f':
-            vector <pair <vertex, int> > found;
-            found = qtree->getObjectsInRegion ({0, 0}, {25, 25});
-
-            foundPoint.clear();
-            foundPoint.resize(found.size());
-
-            for (int i=0; i < found.size(); ++i){
-                foundPoint[i] = found[i].first;
-            }
+            findPoints ();
         break;
     }
     glutPostRedisplay();
@@ -231,13 +243,33 @@ static void key(unsigned char key, int x, int y)
 
 static void mouse (int button, int state, int x, int y)
 {
+    vertex newpoint ( x*pixToXCoord + graphXMin, -y*pixToYCoord + graphYMax);
+
     switch (button){
         case GLUT_LEFT_BUTTON:
-            if (state == GLUT_UP){
-                vertex newpoint ( x*pixToXCoord + graphXMin,
-                                  -y*pixToYCoord + graphYMax);
-                targetPoint.push_back(newpoint);
-                qtree->insert (newpoint, 1);
+            switch (state){
+                case GLUT_DOWN:
+                    leftMouseDown = 1;
+                    targetPoint.push_back(newpoint);
+                    qtree->insert (newpoint, 1);
+                break;
+
+                case GLUT_UP:
+                    leftMouseDown = 0;
+                break;
+            }
+        break;
+        case GLUT_RIGHT_BUTTON:
+        		switch (state){
+                case GLUT_DOWN:
+                	rightMouseDown = 1;
+                	squareCenter = newpoint;
+                  findPoints ();
+                break;
+
+                case GLUT_UP:
+                    rightMouseDown = 0;
+                break;
             }
         break;
     }
@@ -249,8 +281,15 @@ static void motion (int x, int y)
     vertex newpoint ( x*pixToXCoord + graphXMin,
                       -y*pixToYCoord + graphYMax);
 
-    targetPoint.push_back(newpoint);
-    qtree->insert (newpoint, 1);
+    if (leftMouseDown){
+    	targetPoint.push_back(newpoint);
+    	qtree->insert (newpoint, 1);
+    }
+    else if (rightMouseDown){
+    	squareCenter = newpoint;
+    	findPoints ();
+    }
+    
     glutPostRedisplay();
 }
 

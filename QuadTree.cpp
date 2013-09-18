@@ -212,12 +212,9 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 	
 	while (!nodes.empty()){
 		QTNode<T>* top = nodes.front();
-		// check if this leaf node has points in the region
 		if (top->leaf){
-			enclosure_status status = getEnclosureStatus(top, minXY, maxXY);
-			// this node is fully enclosed by the region
-			switch (status)
-			{
+			enclosure_status status = getEnclosureStatus(top->center, top->range, minXY, maxXY);
+			switch (status){
 				// this node is completely contained within the search region
 				case NODE_CONTAINED_BY_REGION:
 					// add all elements to results
@@ -245,12 +242,12 @@ vector <pair <vertex, T> > QuadTree<T>::getObjectsInRegion (vertex minXY, vertex
 			for (int i=0; i < 4; ++i){
 				if (top->child[i]){
 					// check if this nodes children could have points in the region
-					enclosure_status status = getEnclosureStatus (top->child[i], minXY, maxXY);
-
+					enclosure_status status = getEnclosureStatus (top->child[i]->center, top->child[i]->range, minXY, maxXY);
 					switch (status){
 						// this node is completely contained by region, add all points within
 						case NODE_CONTAINED_BY_REGION:
 							addAllPointsToResults (top->child[i], results);
+							//nodes.push (top->child[i]);	
 						break;
 
 						// this node might contain points in the region
@@ -297,13 +294,13 @@ bool QuadTree<T>::pointInRegion (const vertex& point, const vertex& minXY, const
 }
 
 template <typename T>
-enclosure_status QuadTree<T>::getEnclosureStatus (QTNode<T>* node, const vertex& minXY, const vertex& maxXY)
+enclosure_status QuadTree<T>::getEnclosureStatus (const vertex& center, const vertex& range, const vertex& minXY, const vertex& maxXY)
 {
 	int enclosedPts = 0;
-	enclosedPts += pointInRegion ({node->center.x-node->range.x, node->center.y-node->range.y}, minXY, maxXY);
-	enclosedPts += pointInRegion ({node->center.x-node->range.x, node->center.y+node->range.y}, minXY, maxXY);
-	enclosedPts += pointInRegion ({node->center.x+node->range.x, node->center.y-node->range.y}, minXY, maxXY);
-	enclosedPts += pointInRegion ({node->center.x+node->range.x, node->center.y+node->range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({center.x-range.x, center.y-range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({center.x-range.x, center.y+range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({center.x+range.x, center.y-range.y}, minXY, maxXY);
+	enclosedPts += pointInRegion ({center.x+range.x, center.y+range.y}, minXY, maxXY);
 	
 	if (enclosedPts == 4){
 		return NODE_CONTAINED_BY_REGION;
@@ -312,8 +309,17 @@ enclosure_status QuadTree<T>::getEnclosureStatus (QTNode<T>* node, const vertex&
 		return NODE_PARTIALLY_IN_REGION;
 	}
 	else {
-		return NODE_NOT_IN_REGION;	
+		vertex nodeMin (center.x-range.x, center.y-range.y);
+		vertex nodeMax (center.x+range.x, center.y+range.y);
+		enclosedPts += pointInRegion ({minXY.x, minXY.y}, nodeMin, nodeMax);
+		enclosedPts += pointInRegion ({minXY.x, maxXY.y}, nodeMin, nodeMax);
+		enclosedPts += pointInRegion ({maxXY.x, maxXY.y}, nodeMin, nodeMax);
+		enclosedPts += pointInRegion ({maxXY.x, minXY.y}, nodeMin, nodeMax);
+		if (enclosedPts > 0){
+			return NODE_PARTIALLY_IN_REGION;
+		}
 	}
+		return NODE_NOT_IN_REGION;	
 }
 
 template <typename T>
