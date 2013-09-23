@@ -6,7 +6,8 @@ A quad tree is a data structure specializing in the storage and lookup of points
 Controls
 ========
 
-* 'leftmouse' - place new point
+* 'left mouse' - place new point
+* 'right mouse' - move selection window
 * 'w' - pan up
 * 'a' - pan left
 * 's' - pan down
