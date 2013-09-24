@@ -14,6 +14,7 @@ Controls
 * 'd' - pan right
 * 'b' - reduce bucket size
 * 'B' - increase bucket size
+* 'k' - remove points in selection window
 * '-' - zoom in
 * '+' - zoom out
 * '~' - reset tree/delete points
