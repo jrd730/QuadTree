@@ -15,6 +15,7 @@ Controls
 * 'b' - reduce bucket size
 * 'B' - increase bucket size
 * 'k' - remove points in selection window
+* 'r' - place 100 random points
 * '-' - zoom in
 * '+' - zoom out
-* '~' - reset tree/delete points
+* '~' - reset tree/delete points  
