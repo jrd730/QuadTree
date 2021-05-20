@@ -19,3 +19,8 @@ Controls
 * '-' - zoom in
 * '+' - zoom out
 * '~' - reset tree/delete points  
+
+License
+=======
+
+MIT
